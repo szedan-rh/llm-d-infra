@@ -311,9 +311,9 @@ jobs:
 
       - name: Install llmdbenchmark
         run: |
-          find ~ -type f -name "br_v0_2_json_schema.json" -print
+          #find ~ -type f -name "br_v0_2_json_schema.json" -print
           cd ~
-          if [[ ! -d ~/work/llm-d-benchmark ]];
+          if [[ -d ~/work/llm-d-benchmark ]];
           then
             ln -s ~/work/llm-d-benchmark ~/llm-d-benchmark
             ln -s ~/work/llm-d-benchmark/install.sh ~/install.sh
@@ -361,7 +361,7 @@ jobs:
         run: |
           #find ~ -type f -name "cks_nvshmem3.3.9.patch" -print
           cd ~
-          if [[ ! -d ~/work/llm-d ]];
+          if [[ -d ~/work/llm-d ]];
           then
             ln -s ~/work/llm-d ~/llm-d
           fi
