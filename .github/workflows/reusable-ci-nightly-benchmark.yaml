@@ -398,11 +398,11 @@ jobs:
               yq -i '.scenario[0].storage.workloadPvc.storageClassName = "ibm-spectrum-scale-fileset"' ~/work/llm-d-benchmark/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml
             fi
             echo "### Setting \"INFRA_PROVIDER\" to \"$INFRA_PROVIDER\""
-            yq -i ".scenario[0].kustomize.guideVariableOverrides.INFRA_PROVIDER = \"$INFRA_PROVIDER\"" ~/work/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml
+            yq -i ".scenario[0].kustomize.guideVariableOverrides.INFRA_PROVIDER = \"$INFRA_PROVIDER\"" ~/work/llm-d-benchmark/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml
             cat ~/work/llm-d-benchmark/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml | yq '.scenario[0].kustomize.guideVariableOverrides.INFRA_PROVIDER'
             echo "### Setting \"acceleratorBackend\" to \"$LLMDBENCH_CICD_ACCELERATOR/$LLMDBENCH_CICD_BACKEND\""
             yq -i ".scenario[0].kustomize.acceleratorBackend = \"$LLMDBENCH_CICD_ACCELERATOR/$LLMDBENCH_CICD_BACKEND\"" ~/work/llm-d-benchmark/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml
-            cat ~/work/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml | yq '.scenario[0].kustomize.acceleratorBackend'
+            cat ~/work/llm-d-benchmark/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml | yq '.scenario[0].kustomize.acceleratorBackend'
             echo " ### Setting priority class \"nightly-gpu-critical\" on scenario \"$LLMDBENCH_CICD_SCENARIO\""
             for i in vllm decode prefill; do
               find ~/work/llm-d/llm-d/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO/modelserver/ -type f -name "patch-$i.yaml" -exec yq ".spec.template.spec.priorityClassName=\"nightly-gpu-critical\"" -i {} \;
