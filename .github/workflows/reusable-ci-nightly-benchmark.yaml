@@ -178,10 +178,10 @@ jobs:
       - name: set runs-on variable based on cluster provider
         id: set_runs_on
         run: |
-          if [[ "$CLUSTER_TYPE" == "ocp" ]]; then
+          if [[ "$cluster_type" == "ocp" ]]; then
             echo "Targetting self-hosted runners (OpenShift)"
             RUNNERS_JSON_LIST='["self-hosted", "openshift", "pok-prod"]'
-          elif [[ "$CLUSTER_TYPE" == "rocm" ]]; then
+          elif [[ "$cluster_type" == "rocm" ]]; then
             echo "Targetting self-hosted runners (AMD/CI)"
             RUNNERS_JSON_LIST='["rocm"]'
           else
