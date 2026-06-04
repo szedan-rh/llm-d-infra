@@ -172,6 +172,10 @@ jobs:
           if [[ ! -z $IS_ROCM ]]; then
             export CLUSTER_TYPE=rocm
           fi
+          IS_XPU=$(echo "${{ github.workflow }}" | grep -i "\xpu" || true)$(echo "${{ inputs.standup_scenario }}" | grep -i "xpu" || true)
+          if [[ ! -z $IS_XPU ]]; then
+            export CLUSTER_TYPE=xpu
+          fi          
           echo "Cluster provider is \"$CLUSTER_TYPE\""
           echo "cluster_type=$CLUSTER_TYPE" >> "$GITHUB_OUTPUT"
           echo "CLUSTER_TYPE=$CLUSTER_TYPE" >> "$GITHUB_ENV"
