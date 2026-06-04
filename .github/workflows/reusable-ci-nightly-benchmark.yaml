@@ -174,15 +174,16 @@ jobs:
           fi
           echo "Cluster provider is \"$CLUSTER_TYPE\""
           echo "cluster_type=$CLUSTER_TYPE" >> "$GITHUB_OUTPUT"
+          echo "CLUSTER_TYPE=$CLUSTER_TYPE" >> "$GITHUB_ENV"
 
       - name: set runs-on variable based on cluster provider
         id: set_runs_on
         run: |
-          echo "Cluster provider is \"$cluster_type\""
-          if [[ "$cluster_type" == "ocp" ]]; then
+          echo "Cluster provider is \"$CLUSTER_TYPE\""
+          if [[ "$CLUSTER_TYPE" == "ocp" ]]; then
             echo "Targetting self-hosted runners (OpenShift)"
             RUNNERS_JSON_LIST='["self-hosted", "openshift", "pok-prod"]'
-          elif [[ "$cluster_type" == "rocm" ]]; then
+          elif [[ "$CLUSTER_TYPE" == "rocm" ]]; then
             echo "Targetting self-hosted runners (AMD/CI)"
             RUNNERS_JSON_LIST='["rocm"]'
           else
