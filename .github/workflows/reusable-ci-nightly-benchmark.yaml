@@ -211,7 +211,7 @@ jobs:
       LLMDBENCH_CICD_METHOD: ${{ inputs.standup_method || 'standalone' }}
       LLMDBENCH_CICD_ACCELERATOR: ${{ inputs.accelerator_type || 'gpu' }}
       LLMDBENCH_CICD_BACKEND: ${{ inputs.backend_type || 'vllm' }}
-      LLMDBENCH_CICD_INFRA_PROVIDER: ${{ inputs.infra_provider || 'base' }}
+      LLMDBENCH_CICD_INFRA_PROVIDER: ${{ inputs.infra_provider || '' }}
       LLMDBENCH_CICD_CONNECTOR: ${{ inputs.connector || '' }}
       LLMDBENCH_WORKSPACE: ${{ inputs.workspace_dir || '/tmp/llmdbenchcicd' }}
       LLMDBENCH_HF_TOKEN: ${{ secrets.LLMDBENCH_HF_TOKEN }}
