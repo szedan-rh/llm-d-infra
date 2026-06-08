@@ -619,7 +619,7 @@ jobs:
               export LLMDBENCH_HF_TOKEN=hf_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
             fi
             echo -n $LLMDBENCH_HF_TOKEN > hf_token.txt
-            IS_PLAINTEXT=$(echo $LLMDBENCH_HF_TOKEN | grep -q "hf_ || true)
+            IS_PLAINTEXT=$(echo $LLMDBENCH_HF_TOKEN | grep "hf_" || true)
             if [[ -z $IS_PLAINTEXT ]]; then
               echo -n $LLMDBENCH_HF_TOKEN | base64 -d > hf_token.txt
             fi
