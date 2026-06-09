@@ -269,7 +269,8 @@ jobs:
       LLMDBENCH_CICD_WAIT_TIMEOUT: 1200
       LLMDBENCH_CICD_JOB_TIMEOUT: 2700s
       LLMDBENCH_CICD_KUSTOMIZE_STANDUP_TIMEOUT: 1200
-      LLMDBENCH_CICD_RUN_TIMEOUT: 3600
+      LLMDBENCH_CICD_RUN_WAIT_TIMEOUT: 3600
+      LLMDBENCH_CICD_RUN_PVC_BIND_TIMEOUT: 1200
       LLMDBENCH_CICD_DECODE_PODS: ${{ inputs.decode_pods || 'auto' }}
       LLMDBENCH_CICD_PREFILL_PODS: ${{ inputs.prefill_pods || 'auto' }}
       LLMDBENCH_WORKSPACE: ${{ inputs.workspace_dir || '/tmp/llmdbenchcicd' }}
@@ -399,6 +400,9 @@ jobs:
             exit 1
           fi
           DEFAULT_SC=$(kubectl get storageclass  | grep "(default)" | cut -d "(" -f 1)
+          if [[ $LLMDBENCH_CICD_TARGET == 'kind' ]]; then
+            exit 0
+          fi
           echo "Ensuring storageclass \"$DEFAULT_SC\" can create a pvc with accessMode \"ReadWriteMany\"..."
           cat <<PVC_EOF > pvc.yaml
           apiVersion: v1
@@ -709,7 +713,7 @@ jobs:
           if [[ $LLMDBENCH_CICD_METHOD == "kustomize" ]]; then
             export LLMDBENCH_EXTRA_STANDUP_OPERATION_CMD="--kustomize-deploy-timeout $LLMDBENCH_CICD_KUSTOMIZE_STANDUP_TIMEOUT $LLMDBENCH_EXTRA_STANDUP_OPERATION_CMD "
           fi
-          export LLMDBENCH_EXTRA_RUN_OPERATION_CMD="--wait-timeout $LLMDBENCH_CICD_RUN_TIMEOUT $LLMDBENCH_EXTRA_RUN_OPERATION_CMD "
+          export LLMDBENCH_EXTRA_RUN_OPERATION_CMD="--wait-timeout $LLMDBENCH_CICD_RUN_WAIT_TIMEOUT --pvc-bind-timeout $LLMDBENCH_CICD_RUN_PVC_BIND_TIMEOUT $LLMDBENCH_EXTRA_RUN_OPERATION_CMD "
           if [[ "$LLMDBENCH_MONITORING_ENABLED" == "false" ]]; then
             export LLMDBENCH_EXTRA_STANDUP_OPERATION_CMD="--no-monitoring $LLMDBENCH_EXTRA_STANDUP_OPERATION_CMD "
             export LLMDBENCH_EXTRA_TEARDOWN_OPERATION_CMD="$LLMDBENCH_EXTRA_TEARDOWN_OPERATION_CMD "
