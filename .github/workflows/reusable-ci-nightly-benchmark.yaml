@@ -703,6 +703,11 @@ jobs:
             detected_model=$(kubectl kustomize $LLMDBENCH_CICD_KUSTOMIZE_PATH | yq .spec.template.spec.containers[0].args | grep -Ev "\- \--|\- '|\---|null" | uniq | cut -d ' ' -f 2)
             echo "LLMDBENCH_CICD_DETECTED_MODEL is \"$detected_model\""
             echo "LLMDBENCH_CICD_DETECTED_MODEL=$detected_model"  >> $GITHUB_ENV
+            if [[ $LLMDBENCH_CICD_SCENARIO == "predicted-latency-routing" ]]; then
+#              find ~/work/llm-d/llm-d/$LLMDBENCH_CICD_SCENARIO_DIR/optimized-baseline/$LLMDBENCH_CICD_CONNECTOR/modelserver/ -type f -name "kustomization.yaml" -exec yq ".namePrefix=\"predicted-latency-routing\"" -i {} \;
+              find ~/work/llm-d/llm-d/$LLMDBENCH_CICD_SCENARIO_DIR/optimized-baseline/$LLMDBENCH_CICD_CONNECTOR/modelserver/ -type f -name "kustomization.yaml" -exec sed -i "s/optimized-baseline-/predicted-latency-routing-/g" {} \;
+              find ~/work/llm-d/llm-d/$LLMDBENCH_CICD_SCENARIO_DIR/optimized-baseline/$LLMDBENCH_CICD_CONNECTOR/modelserver/ -type f -name "kustomization.yaml" -exec bash -c 'echo -n $1:; yq ".namePrefix" $1' _ {} \;
+            fi
             echo " ### Setting priority class \"$LLMDBENCH_CICD_PRIORITY_CLASS\" on scenario \"$LLMDBENCH_CICD_SCENARIO\""
             for i in vllm decode prefill; do
               find ~/work/llm-d/llm-d/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO/$LLMDBENCH_CICD_CONNECTOR/modelserver/ -type f -name "patch-$i.yaml" -exec yq ".spec.template.spec.priorityClassName=\"$LLMDBENCH_CICD_PRIORITY_CLASS\"" -i {} \;
