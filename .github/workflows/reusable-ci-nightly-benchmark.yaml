@@ -704,7 +704,6 @@ jobs:
             echo "LLMDBENCH_CICD_DETECTED_MODEL is \"$detected_model\""
             echo "LLMDBENCH_CICD_DETECTED_MODEL=$detected_model"  >> $GITHUB_ENV
             if [[ $LLMDBENCH_CICD_SCENARIO == "predicted-latency-routing" ]]; then
-#              find ~/work/llm-d/llm-d/$LLMDBENCH_CICD_SCENARIO_DIR/optimized-baseline/$LLMDBENCH_CICD_CONNECTOR/modelserver/ -type f -name "kustomization.yaml" -exec yq ".namePrefix=\"predicted-latency-routing\"" -i {} \;
               find ~/work/llm-d/llm-d/$LLMDBENCH_CICD_SCENARIO_DIR/optimized-baseline/$LLMDBENCH_CICD_CONNECTOR/modelserver/ -type f -name "kustomization.yaml" -exec sed -i "s/optimized-baseline-/predicted-latency-routing-/g" {} \;
               find ~/work/llm-d/llm-d/$LLMDBENCH_CICD_SCENARIO_DIR/optimized-baseline/$LLMDBENCH_CICD_CONNECTOR/modelserver/ -type f -name "kustomization.yaml" -exec bash -c 'echo -n $1:; yq ".namePrefix" $1' _ {} \;
             fi
