@@ -640,7 +640,7 @@ jobs:
             echo -n "; $lkcmd" >> ~/work/lkcmd.txt
             eval $lkcmd
             cat ~/work/llm-d-benchmark/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml | yq '.scenario[0].kustomize.guideVariableOverrides.REPO_ROOT'
-            echo "### Setting \"GUIDE_NAME\" to \"$LLMDBENCH_CICD_SCENARIO""
+            echo "### Setting \"GUIDE_NAME\" to \"$LLMDBENCH_CICD_SCENARIO\""
             lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.GUIDE_NAME = \\\"$LLMDBENCH_CICD_SCENARIO\\\"\" ~/work/llm-d-benchmark/llm-d-benchmark/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/$LLMDBENCH_CICD_SCENARIO.yaml"
             echo -n "; $lkcmd" >> ~/work/lkcmd.txt
             eval $lkcmd
