@@ -20,6 +20,11 @@ on:
         required: false
         type: string
         default: 'false'
+      failure_category:
+        description: 'Category of failure from the benchmark workflow (prepare, prereqs, infra, guide, benchmark)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   update-badge:
@@ -52,7 +57,6 @@ jobs:
                 while IFS= read -r job; do
                   conclusion=$(echo "$job" | jq -r '.conclusion // empty')
                   name=$(echo "$job" | jq -r '.name // empty')
-                  # Skip our own job
                   echo "$name" | grep -qi "update-badge" && continue
                   if [ "$conclusion" = "cancelled" ]; then
                     started=$(echo "$job" | jq -r '.started_at // empty')
@@ -61,7 +65,6 @@ jobs:
                       start_epoch=$(date -d "$started" +%s 2>/dev/null || echo 0)
                       end_epoch=$(date -d "$completed" +%s 2>/dev/null || echo 0)
                       duration=$((end_epoch - start_epoch))
-                      # If job ran for more than 50 minutes, likely a timeout
                       if [ "$duration" -gt 3000 ]; then
                         IS_TIMEOUT=true
                       fi
@@ -83,30 +86,32 @@ jobs:
               echo "message=skipped" >> $GITHUB_OUTPUT
               ;;
             failure)
-              # Inspect which step failed to classify as infra-error vs test failure
-              FAILED_STEP=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
-                --paginate --jq '
-                  .jobs[]
-                  | select(.conclusion == "failure")
-                  | .steps[]
-                  | select(.conclusion == "failure")
-                  | .name' 2>/dev/null | head -1)
-
-              if [ -z "$FAILED_STEP" ]; then
-                # Could not determine failed step, default to red
-                echo "color=red" >> $GITHUB_OUTPUT
-                echo "message=failing" >> $GITHUB_OUTPUT
-              else
-                # Classify based on step name keywords
-                INFRA_PATTERN="(setup|provision|deploy|install|configure|connect|create|build|pull|auth|login|checkout|cluster|ready|wait|credential|namespace|kind|helm|kustomize|kubectl|image|registry|download|upload|standup)"
-                if echo "$FAILED_STEP" | grep -iqE "$INFRA_PATTERN"; then
+              case "${{ inputs.failure_category }}" in
+                prereqs)
+                  echo "color=black" >> $GITHUB_OUTPUT
+                  echo "message=prereqs-error" >> $GITHUB_OUTPUT
+                  ;;
+                infra)
                   echo "color=orange" >> $GITHUB_OUTPUT
                   echo "message=infra-error" >> $GITHUB_OUTPUT
-                else
+                  ;;
+                prepare)
+                  echo "color=brown" >> $GITHUB_OUTPUT
+                  echo "message=prepare-error" >> $GITHUB_OUTPUT
+                  ;;
+                guide)
+                  echo "color=red" >> $GITHUB_OUTPUT
+                  echo "message=guide-error" >> $GITHUB_OUTPUT
+                  ;;
+                benchmark)
+                  echo "color=yellow" >> $GITHUB_OUTPUT
+                  echo "message=benchmark-error" >> $GITHUB_OUTPUT
+                  ;;
+                *)
                   echo "color=red" >> $GITHUB_OUTPUT
                   echo "message=failing" >> $GITHUB_OUTPUT
-                fi
-              fi
+                  ;;
+              esac
               ;;
             *)
               echo "color=red" >> $GITHUB_OUTPUT

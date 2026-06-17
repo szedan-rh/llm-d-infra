@@ -163,6 +163,10 @@ on:
         required: false
         type: 'string'
         default: '2400'
+    outputs:
+      failure_category:
+        description: 'Category of the first failed step (prepare, prereqs, infra, guide, benchmark)'
+        value: ${{ jobs.benchmark.outputs.failure_category }}
 
 #  push:
 #    branches:
@@ -285,6 +289,8 @@ jobs:
     needs: [ensure-nightly-build-image]
     if: inputs.accelerator_type != 'tpu/v7' && inputs.accelerator_type != 'tpu-v7'
     timeout-minutes: 240
+    outputs:
+      failure_category: ${{ steps.detect_failure.outputs.failure_category }}
 
     env:
       LLMDBENCH_CICD_NS: ${{ inputs.cluster_namespace || 'llmdbenchcicd' }}
@@ -947,4 +953,47 @@ jobs:
             done
           fi
           exit 1
+        shell: bash
+
+      - name: Detect failure category
+        id: detect_failure
+        if: failure()
+        run: |
+          CATEGORY=""
+          if [ "${{ steps.benchmark_run.outcome }}" = "failure" ]; then
+            CATEGORY="benchmark"
+          elif [ "${{ steps.guide_standup.outcome }}" = "failure" ] || \
+               [ "${{ steps.guide_teardown.outcome }}" = "failure" ] || \
+               [ "${{ steps.guide_teardown_again.outcome }}" = "failure" ]; then
+            CATEGORY="guide"
+          elif [ "${{ steps.prereq_install_oc.outcome }}" = "failure" ] || \
+               [ "${{ steps.prereq_install_yq.outcome }}" = "failure" ] || \
+               [ "${{ steps.prereq_set_gcs_full_path.outcome }}" = "failure" ] || \
+               [ "${{ steps.prereq_conditionally_clone_llmd.outcome }}" = "failure" ] || \
+               [ "${{ steps.prereq_install_llmdbenchmark.outcome }}" = "failure" ] || \
+               [ "${{ steps.prereqs_apply_overrides_to_llmdbenchmark_scenarios.outcome }}" = "failure" ] || \
+               [ "${{ steps.prereqs_set_harness_executable.outcome }}" = "failure" ] || \
+               [ "${{ steps.prereqs_apply_overrides_to_kustomize_manifests.outcome }}" = "failure" ] || \
+               [ "${{ steps.prereqs_setup_extrac_cli_parms_llmdbenchmark.outcome }}" = "failure" ]; then
+            CATEGORY="prereqs"
+          elif [ "${{ steps.infra_create_kind_cluster.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_authenticate_google_cloud.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_setup_gcloud_cli.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_get_gke_credentials.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_get_kubeconfig_from_secret.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_show_cluster_names.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_show_cluster_nodes.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_show_cluster_storageclasses.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_request_tpus.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_create_nightly_prioclass.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_label_node_for_simulated_accelerators.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_handle_namesace_and_secret.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_upload_results_to_gcs.outcome }}" = "failure" ] || \
+               [ "${{ steps.infra_block_waiting_for_standalone_baseline.outcome }}" = "failure" ]; then
+            CATEGORY="infra"
+          elif [ "${{ steps.prepare_checkout_code.outcome }}" = "failure" ] || \
+               [ "${{ steps.prepare_setup_python.outcome }}" = "failure" ]; then
+            CATEGORY="prepare"
+          fi
+          echo "failure_category=$CATEGORY" >> $GITHUB_OUTPUT
         shell: bash
