@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add hold label when base branch is not main
-        if: github.event.pull_request.base.ref != 'main'
+        if: github.event.pull_request.base.ref != 'main' && !startsWith(github.event.pull_request.base.ref, 'release-')
         uses: actions-ecosystem/action-add-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
